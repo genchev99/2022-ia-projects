@@ -14,7 +14,7 @@ In addition we need a way send `HTTP requests` in order to test our `API` - http
 To accomplish problem 01 you need to implement the following steps.
 
 1. Create a new http endpoint that can handle `POST` requests (handling post requests is essential because we need to send information
-with the request) - `http://localhost:8080/`
+with the request) - `http://localhost:8080/` - https://gist.github.com/mdonkers/63e115cc0c79b4f6b8b3a6b797e485c7
 2. Extract the text content comming from the `request body`
 3. Create a unique name for the paste - https://www.javatpoint.com/python-program-to-generate-a-random-string
 4. Store the text content in a local file with that name (remember how to read and write files in python?)
