@@ -39,6 +39,8 @@ Returns: None
 
 4. A frontend page that allows you to create a new post using the API endpoint (3)
 
+> Important: To get around CORS you need to make your server host this HTML file (look at the first code example)
+
 ###### example:
 ```
 (When you load a url in the browser it will send a get request to that url and it will display the result)
@@ -49,6 +51,7 @@ Returns: <HTML-file-that-has-a-field-to-create-new-pastes>
 
 5. A frontend page that allows you to gather paste information using the API endpoint (1)
 
+> Important: To get around CORS you need to make your server host this HTML file (look at the first code example)
 
 ###### example:
 ```
@@ -57,3 +60,86 @@ GET http://localhost:8080/pastes/<paste-id>
 
 Returns: <HTML-file-that-has-the-content-of-paste-with-id-paste-id>
 ``` 
+
+## Code that you can use
+
+### An http server that has one GET request handle and on GET it returns the contents of file called index.html (from the same directory)
+
+```py
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+hostName = "localhost"
+serverPort = 8080
+
+
+class MyServer(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+        with open("index.html", "r") as fd:
+            self.wfile.write(bytes(fd.read(), "utf-8"))
+
+
+if __name__ == "__main__":
+    webServer = HTTPServer((hostName, serverPort), MyServer)
+    print("Server started http://%s:%s" % (hostName, serverPort))
+
+    try:
+        webServer.serve_forever()
+    except KeyboardInterrupt:
+        pass
+
+    webServer.server_close()
+    print("Server stopped.")
+```
+
+### An http server that knows how to treat requests that are sent to the API and requests that are requesting HTML pages
+
+```py
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+hostName = "localhost"
+serverPort = 8080
+
+
+class MyServer(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+
+        if self.path.startswith("/api"):
+            # In this case we'll handle api requests
+            if self.path == "/api/pastes" or self.path == "/api/pastes/":
+                # Implement problem (2.)
+                # Find a way to read all pastes and return them in a list
+                pass
+            elif self.path.startswith("/api/pastes/"):
+                # Implement problem (1.)
+                # Extract the name of the paste from self.path, find the paste and return its content
+                pass
+        else:
+            # In this case we return HTML files
+            if self.path == "/pastes" or self.path == "/pastes/":
+                # Implement problem (4.)
+                with open("create_paste.html", "r") as fd:
+                    self.wfile.write(bytes(fd.read(), "utf-8"))
+            elif self.path.startswith("/pastes/"):
+                # Implement problem (5.)
+                with open("read_paste.html", "r") as fd:
+                    self.wfile.write(bytes(fd.read(), "utf-8"))
+
+
+if __name__ == "__main__":
+    webServer = HTTPServer((hostName, serverPort), MyServer)
+    print("Server started http://%s:%s" % (hostName, serverPort))
+
+    try:
+        webServer.serve_forever()
+    except KeyboardInterrupt:
+        pass
+
+    webServer.server_close()
+    print("Server stopped.")
+```
