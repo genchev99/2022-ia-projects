@@ -143,3 +143,93 @@ if __name__ == "__main__":
     webServer.server_close()
     print("Server stopped.")
 ```
+
+### An html file that has a field for a user the enter some text and then sends an HTTP POST request to our API (create_paste.html)
+
+```html
+<html>
+    <head>
+        <!-- META info -->
+        <script>
+            function handleNewPasteClick() {
+                const textareaElement = document.getElementById("paste-content")
+                const pasteContent = textareaElement.value
+                
+                console.log("paste contnet: ", pasteContent)
+                // send http request to our api with paste content
+                submitPaste(pasteContent)
+                    .then(() => {
+                        cleanup()
+                    })
+                    .catch((e) => {
+                        alert(e)
+                    })
+            }
+
+            async function submitPaste(pasteContent) {
+                if (!pasteContent) {
+                    return
+                }
+                const url = "http://localhost:8080/api/pastes"
+                
+                return await fetch(url, {
+                    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                    mode: 'cors', // no-cors, *cors, same-origin
+                    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                    credentials: 'same-origin', // include, *same-origin, omit
+                    headers: {
+                        'Content-Type': 'application/text'
+                    },
+                    redirect: 'follow', // manual, *follow, error
+                    referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                    body: pasteContent
+                })
+            }
+
+            function cleanup() {
+                const textareaElement = document.getElementById("paste-content")
+                textareaElement.value = ""
+            }
+        </script>
+    </head>
+    <body>
+        <textarea class="primary-border half-width" id="paste-content"></textarea>
+        <button onclick="handleNewPasteClick()">Create paste</button>
+    </body>
+</html>
+```
+
+### An http server that has a POST request handle that saves the content of the body to a local file
+
+```py
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+hostName = "localhost"
+serverPort = 8080
+
+
+class MyServer(BaseHTTPRequestHandler):
+    def do_POST(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+
+        content_length = int(self.headers['Content-Length'])  # <--- Gets the size of data
+        post_data = self.rfile.read(content_length)  # <--- Gets the data itself
+
+        with open("request_body.txt", "w") as fd:
+            fd.write(post_data.decode('utf-8'))
+
+
+if __name__ == "__main__":
+    webServer = HTTPServer((hostName, serverPort), MyServer)
+    print("Server started http://%s:%s" % (hostName, serverPort))
+
+    try:
+        webServer.serve_forever()
+    except KeyboardInterrupt:
+        pass
+
+    webServer.server_close()
+    print("Server stopped.")
+```
