@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Paste</title>
+
+  <script>
+    /**
+     * This is the
+     * @type {string}
+     */
+    let path = window.location.pathname
+    const components = path.split("/")
+    /**
+     * Gets the last part of the path (which should be the paste id)
+     * @example /paste/123 -> 123
+     * @type {string}
+     */
+    const pasteId = components[components.length - 1]
+
+    /**
+     * Get the paste by id and load it on the page
+     */
+    getPase(pasteId)
+      .then(pasteContent => {
+        /**
+         * Gets the placeholder element
+         * @type {HTMLElement}
+         */
+        const pastePlaceholder = document.getElementById("paste-placeholder")
+        /**
+         * Sets the text content of that element to the paste content fetched from the api
+         * @type {string}
+         */
+        pastePlaceholder.textContent = pasteContent
+      })
+
+    /**
+     * Sends a get request to the api
+     * @param pasteId
+     * @returns {Promise<string>}
+     */
+    async function getPase(pasteId) {
+      const response = await fetch(`/api/pastes/${pasteId}`)
+
+      return await response.text()
+    }
+  </script>
+</head>
+<body>
+  <p id="paste-placeholder"></p>
+</body>
+</html>
