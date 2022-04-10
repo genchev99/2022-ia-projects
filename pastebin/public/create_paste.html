@@ -1,0 +1,148 @@
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+  <!-- META info -->
+  <script>
+    window.addEventListener("load", (event) => {
+      console.log("page is fully loaded")
+      
+      getPastes()
+              .then(pastes => {
+                console.log(pastes)
+                listPastes(pastes)
+              })
+              .catch(err => {
+                alert(err)
+              })
+    });
+    
+    function createRequestJsonData() {
+      const code_select = document.getElementById('code');
+      const code = code_select.options[code_select.selectedIndex].value;
+      
+      return {
+        "paste": document.getElementById("paste-content").value,
+        "password": document.getElementById("password").value,
+        "use_password": document.getElementById("use-password").checked,
+        "title": document.getElementById("title").value,
+        "code": code,
+        "burn_after_read": document.getElementById("burn-after-read").checked,
+      }
+    }
+    
+    function handleNewPasteClick() {
+      const requestBody = createRequestJsonData()
+      
+      // send http request to our api with paste content
+      submitPaste(requestBody)
+              .then(() => {
+                cleanup()
+              })
+              .catch((e) => {
+                alert(e)
+              })
+    }
+    
+    /**
+     * Takes an object with lists and presents them on the page
+     * @param pastes
+     */
+    function listPastes(pastes) {
+      const pastesList = document.getElementById("pastes")
+      
+      for (const pasteKey in pastes) {
+        const paste = pastes[pasteKey]
+        const li = document.createElement("li")
+        const link = document.createElement("a")
+        link.href = `http://localhost:8080/pastes/${pasteKey}`
+        link.innerText = paste.title || "Untitled"
+        
+        li.appendChild(link)
+        pastesList.appendChild(li)
+      }
+    }
+    
+    async function submitPaste(requestBody) {
+      const url = "http://localhost:8080/api/pastes/"
+      
+      return await fetch(url, {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        mode: 'cors', // no-cors, *cors, same-origin
+        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: 'same-origin', // include, *same-origin, omit
+        headers: {
+          'Content-Type': 'application/text'
+        },
+        redirect: 'follow', // manual, *follow, error
+        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: JSON.stringify(requestBody)
+      })
+    }
+    
+    function cleanup() {
+      document.getElementById("paste-content").value = ""
+    }
+    
+    async function getPastes() {
+      const response = await fetch("http://localhost:8080/api/pastes/")
+      
+      return await response.json()
+    }
+    
+    function handleUsePasswordClick() {
+      const passwordInput = document.getElementById("password")
+      passwordInput.disabled = !passwordInput.disabled
+      
+      if (passwordInput.disabled) {
+        /**
+         * If we disable the password we want to clear the stale password
+         * @type {string}
+         */
+        passwordInput.value = ""
+      }
+    }
+  </script>
+  
+  <style>
+    
+  </style>
+</head>
+<body>
+<section id="create-paste-section">
+  <h1>Create a new paste</h1>
+  <form id="create-paste">
+    <label for="paste-content"></label>
+    <textarea id="paste-content">Paste content...</textarea>
+    <div id="password-input-wrapper">
+      <div class="input-label-wrapper">
+        <label for="use-password">Use password</label>
+        <input onclick="handleUsePasswordClick()" type="checkbox" name="use-password" id="use-password"/>
+        
+        <label for="password"></label>
+        <input type="password" name="password" id="password" disabled/>
+      </div>
+    </div>
+    <div class="input-label-wrapper">
+      <label for="title">Title</label><input type="text" name="title" id="title">
+    </div>
+    <div class="input-label-wrapper">
+      <label for="burn-after-read">Burn after read</label>
+      <input type="checkbox" name="burn-after-read" id="burn-after-read"/>
+    </div>
+    <div class="input-label-wrapper">
+      <label for="code">Code</label>
+      
+      <select name="code" id="code">
+        <option value="python">Python</option>
+        <option value="C#">C#</option>
+        <option value="C++">C++</option>
+      </select>
+    </div>
+    <button id="submit" onclick="handleNewPasteClick()">Create paste</button>
+  </form>
+</section>
+<section id="list-pastes-section">
+  <h1>List of recent pastes</h1>
+  <ul id="pastes"></ul>
+</section>
+</body>
+</html>
