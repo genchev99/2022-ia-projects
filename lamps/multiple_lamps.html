@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      background-color: #292929;
+      color: white;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+    
+    .switch input { 
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+    
+    input:checked + .slider {
+      background-color: #0ec755;
+    }
+
+    input:not(:checked) + .slider {
+      background-color: #c00f1e;
+    }
+    
+    input:focus + .slider {
+      box-shadow: 0 0 1px #2196F3;
+    }
+    
+    input:checked + .slider:before {
+      -webkit-transform: translateX(26px);
+      -ms-transform: translateX(26px);
+      transform: translateX(26px);
+    }
+    
+    /* Rounded sliders */
+    .slider.round {
+      border-radius: 34px;
+    }
+    
+    .slider.round:before {
+      border-radius: 50%;
+    }
+
+    .card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      width: 20%;
+      min-width: 20%;
+      height: 300px;
+      align-items: center;
+      background-color: rgb(54, 54, 54);
+      border-radius: 20px;
+      border-width: 2px;
+      border-style: solid;
+      border-color: rgb(93, 93, 93);
+      font-size: 35px;
+    }
+
+    .cards-wrapper, h1 {
+      display: flex;
+      justify-content: space-evenly;
+      width: 80%;
+      margin: 0 auto;
+    }
+
+    h1 {
+      padding-bottom: 10%;
+      padding-top: 3%;
+    }
+
+  </style>
+
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    $('input[type=checkbox]').change(function() {
+        $.post("/toggle/", {
+            state: this.checked, 
+            id: this.id,
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+        });
+    });
+});
+</script>
+
+</head>
+<body>
+  <h1>Smart Lamps</h1>
+  <div class="cards-wrapper">
+    <div class="card">
+      <span class="lamp-id">Bedroom</span>
+      <label class="switch">
+        <input id="bedroom" type="checkbox" value="closed" {% if button_state %} checked {% endif %} >
+        <span class="slider round"></span>
+      </label>
+    </div>
+
+    <div class="card">
+      <span class="lamp-id">Bathroom</span>
+      <label class="switch">
+        <input id="bathroom" type="checkbox" value="closed" {% if button_state %} checked {% endif %} >
+        <span class="slider round"></span>
+      </label>
+    </div>
+
+    <div class="card">
+      <span class="lamp-id">Kitchen</span>
+      <label class="switch">
+        <input id="kitchen" type="checkbox" value="closed" {% if button_state %} checked {% endif %} >
+        <span class="slider round"></span>
+      </label>
+    </div>
+  </div>
+  <!-- <footer>Created by: Maximilian and Valentina</footer> -->
+</body>
+</html>
